@@ -1,0 +1,6 @@
+Lead Created,Customer Name,Primary Email,Contact Number,Company / Business,City Name,State / Region,Country,Assigned Sales Owner,Current Stage,Remarks,Campaign / Property Source,Possession Timeline,Extra Details
+2026-05-13 14:20:48,John Doe,john.doe@example.com,+91 9876543210,GrowEasy,Mumbai,Maharashtra,India,test@gmail.com,good lead follow up,Client is asking to reschedule demo,leads_on_demand,,
+13 May 2026 14:25:30,Sarah Johnson,sarah.johnson@example.com,9876543211,Tech Solutions,Bangalore,Karnataka,India,test@gmail.com,did not connect,"Person was busy, will try again next week",,,
+2026/05/13 14:30:15,Rajesh Patel,rajesh.patel@example.com,+91-9876543212,Startup Inc,Delhi,Delhi,India,test@gmail.com,bad lead,Not interested in our services,unknown source,,
+2026-05-13T14:35:22,Priya Singh,priya.singh@example.com,"+91 9876543213 / +91 9999988888",Enterprise Corp,Pune,Maharashtra,India,test@gmail.com,sale done,"Deal closed, onboarding in progress",meridian_tower,,
+,,no-contact-name,,,,,,,,This row has no email or mobile and should be skipped,,,

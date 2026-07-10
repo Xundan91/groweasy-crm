@@ -1,0 +1,201 @@
+"use client";
+
+import Papa from "papaparse";
+import { useMemo, useRef, useState } from "react";
+import { DataTable } from "@/components/DataTable";
+import type { CsvPreviewRow, ImportResponse } from "@/lib/types";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
+
+export default function Home() {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [rows, setRows] = useState<CsvPreviewRow[]>([]);
+  const [error, setError] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [result, setResult] = useState<ImportResponse | null>(null);
+
+  const previewRows = useMemo(() => rows.slice(0, 100), [rows]);
+
+  function resetResult() {
+    setResult(null);
+    setError("");
+  }
+
+  function handleFile(nextFile: File | undefined) {
+    resetResult();
+    if (!nextFile) return;
+
+    if (!nextFile.name.toLowerCase().endsWith(".csv")) {
+      setError("Please upload a valid CSV file.");
+      return;
+    }
+
+    setFile(nextFile);
+    Papa.parse<CsvPreviewRow>(nextFile, {
+      header: true,
+      skipEmptyLines: true,
+      transformHeader: (header) => header.trim(),
+      transform: (value) => value.trim(),
+      complete: ({ data, errors }) => {
+        if (errors.length > 0) {
+          setError(errors[0]?.message ?? "Could not parse the CSV file.");
+          setRows([]);
+          return;
+        }
+        setRows(data);
+      },
+      error: (parseError) => {
+        setError(parseError.message);
+        setRows([]);
+      }
+    });
+  }
+
+  async function confirmImport() {
+    if (!file) return;
+    setIsImporting(true);
+    setError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(`${API_BASE_URL}/api/import`, {
+        method: "POST",
+        body: formData
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.message ?? "Import failed");
+      }
+      setResult(payload);
+    } catch (importError) {
+      setError(importError instanceof Error ? importError.message : "Import failed");
+    } finally {
+      setIsImporting(false);
+    }
+  }
+
+  return (
+    <main>
+      <section className="hero">
+        <div>
+          <p className="eyebrow">GrowEasy Assignment</p>
+          <h1>AI-powered CSV importer for messy CRM leads</h1>
+          <p className="hero__copy">
+            Upload any valid CSV, preview it locally, then confirm to map messy columns into GrowEasy CRM
+            records with AI-assisted extraction.
+          </p>
+        </div>
+        <div className="hero__badge">Next.js + Express + OpenAI</div>
+      </section>
+
+      <section
+        className={`dropzone ${isDragging ? "dropzone--active" : ""}`}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={(event) => {
+          event.preventDefault();
+          setIsDragging(false);
+          handleFile(event.dataTransfer.files[0]);
+        }}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".csv,text/csv"
+          onChange={(event) => handleFile(event.target.files?.[0])}
+          hidden
+        />
+        <div className="dropzone__icon">CSV</div>
+        <h2>Upload CSV</h2>
+        <p>Drag and drop your file here, or choose a CSV from your computer.</p>
+        <button type="button" className="button button--secondary" onClick={() => inputRef.current?.click()}>
+          Choose File
+        </button>
+        {file ? <p className="file-name">{file.name}</p> : null}
+      </section>
+
+      {error ? <div className="alert">{error}</div> : null}
+
+      {rows.length > 0 ? (
+        <>
+          <section className="summary-grid">
+            <Metric label="Uploaded rows" value={rows.length} />
+            <Metric label="Preview rows" value={previewRows.length} />
+            <Metric label="AI status" value={result ? (result.usedAi ? "Used AI" : "Fallback") : "Not started"} />
+          </section>
+
+          <DataTable title="CSV Preview" rows={previewRows} emptyMessage="Upload a CSV to preview rows." />
+
+          <div className="actions">
+            <button
+              type="button"
+              className="button"
+              onClick={confirmImport}
+              disabled={isImporting || rows.length === 0}
+            >
+              {isImporting ? "Extracting leads..." : "Confirm Import"}
+            </button>
+            <p>No backend or AI processing happens until you confirm.</p>
+          </div>
+        </>
+      ) : null}
+
+      {isImporting ? (
+        <section className="progress-card">
+          <div className="spinner" />
+          <div>
+            <h2>Processing in batches</h2>
+            <p>The backend is parsing records and mapping fields into the GrowEasy CRM schema.</p>
+          </div>
+        </section>
+      ) : null}
+
+      {result ? (
+        <>
+          <section className="summary-grid">
+            <Metric label="Total imported" value={result.totalImported} tone="success" />
+            <Metric label="Total skipped" value={result.totalSkipped} tone="warning" />
+            <Metric label="Total rows" value={result.totalRows} />
+          </section>
+
+          <DataTable title="Successfully Parsed CRM Records" rows={result.records} emptyMessage="No records parsed." />
+          <DataTable
+            title="Skipped Records"
+            rows={result.skipped.map((skip) => ({
+              rowNumber: skip.rowNumber,
+              reason: skip.reason,
+              original: JSON.stringify(skip.original)
+            }))}
+            emptyMessage="No skipped records."
+            maxHeight={260}
+          />
+        </>
+      ) : null}
+    </main>
+  );
+}
+
+function Metric({
+  label,
+  value,
+  tone
+}: {
+  label: string;
+  value: string | number;
+  tone?: "success" | "warning";
+}) {
+  return (
+    <div className={`metric ${tone ? `metric--${tone}` : ""}`}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
