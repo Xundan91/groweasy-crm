@@ -1,6 +1,6 @@
 :root {
   color-scheme: light;
-  --background: #f4f7fb;
+  --background: #eef5f7;
   --surface: #ffffff;
   --surface-strong: #f8fafc;
   --text: #102024;
@@ -10,9 +10,11 @@
   --primary-dark: #df4f25;
   --teal: #087f78;
   --teal-soft: #e0f7f5;
+  --cream: #fff7ed;
   --danger: #b42318;
   --warning: #b7791f;
   --shadow: 0 24px 80px rgba(22, 42, 48, 0.12);
+  --shadow-soft: 0 14px 40px rgba(22, 42, 48, 0.08);
 }
 
 * {
@@ -27,8 +29,9 @@ body {
 
 body {
   background:
-    radial-gradient(circle at top left, rgba(8, 127, 120, 0.14), transparent 28rem),
-    linear-gradient(180deg, #ffffff 0%, var(--background) 46%);
+    radial-gradient(circle at 12% 8%, rgba(8, 127, 120, 0.18), transparent 24rem),
+    radial-gradient(circle at 88% 4%, rgba(255, 107, 61, 0.16), transparent 20rem),
+    linear-gradient(180deg, #ffffff 0%, var(--background) 54%);
   color: var(--text);
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -47,10 +50,19 @@ main {
 
 .hero {
   align-items: flex-start;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(224, 247, 245, 0.74)),
+    radial-gradient(circle at right top, rgba(255, 107, 61, 0.14), transparent 22rem);
+  border: 1px solid rgba(223, 232, 236, 0.9);
+  border-radius: 36px;
+  box-shadow: var(--shadow);
   display: flex;
   gap: 24px;
   justify-content: space-between;
   margin-bottom: 28px;
+  overflow: hidden;
+  padding: 34px;
+  position: relative;
 }
 
 .eyebrow {
@@ -89,14 +101,31 @@ h2 {
 }
 
 .hero__badge {
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.86);
   border: 1px solid var(--border);
   border-radius: 999px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-soft);
   color: var(--teal);
   flex: 0 0 auto;
   font-weight: 800;
   padding: 12px 16px;
+}
+
+.step-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.step-list span {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(8, 127, 120, 0.14);
+  border-radius: 999px;
+  color: #254348;
+  font-size: 0.88rem;
+  font-weight: 800;
+  padding: 10px 13px;
 }
 
 .dropzone,
@@ -109,15 +138,20 @@ h2 {
   border: 1px solid var(--border);
   border-radius: 28px;
   box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
 }
 
 .dropzone {
   align-items: center;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(135deg, rgba(8, 127, 120, 0.55), rgba(255, 107, 61, 0.6)) border-box;
+  border: 1px dashed transparent;
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-bottom: 22px;
-  padding: 44px 24px;
+  padding: 46px 24px;
   text-align: center;
   transition:
     border-color 180ms ease,
@@ -126,7 +160,9 @@ h2 {
 }
 
 .dropzone--active {
-  background: var(--teal-soft);
+  background:
+    linear-gradient(var(--teal-soft), var(--teal-soft)) padding-box,
+    linear-gradient(135deg, var(--teal), var(--primary)) border-box;
   border-color: var(--teal);
   transform: translateY(-2px);
 }
@@ -138,7 +174,7 @@ h2 {
 
 .dropzone__icon {
   align-items: center;
-  background: var(--teal-soft);
+  background: linear-gradient(135deg, var(--teal-soft), var(--cream));
   border-radius: 18px;
   color: var(--teal);
   display: inline-flex;
@@ -148,10 +184,15 @@ h2 {
   width: 58px;
 }
 
+.dropzone__hint {
+  font-size: 0.92rem;
+}
+
 .button {
   background: var(--primary);
   border: 0;
   border-radius: 16px;
+  box-shadow: 0 14px 24px rgba(255, 107, 61, 0.24);
   color: #ffffff;
   cursor: pointer;
   font-weight: 900;
@@ -173,7 +214,8 @@ h2 {
 }
 
 .button--secondary {
-  background: var(--text);
+  background: linear-gradient(135deg, var(--text), #254348);
+  box-shadow: 0 14px 24px rgba(16, 32, 36, 0.18);
 }
 
 .button--secondary:hover:not(:disabled) {
@@ -200,7 +242,17 @@ h2 {
 }
 
 .metric {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.94));
   padding: 20px;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.metric:hover {
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-2px);
 }
 
 .metric span {
@@ -233,6 +285,7 @@ h2 {
 
 .table-card__header {
   align-items: center;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
   border-bottom: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
@@ -270,7 +323,7 @@ td {
 }
 
 th {
-  background: var(--surface-strong);
+  background: #f7fbfb;
   color: #405057;
   font-size: 0.76rem;
   letter-spacing: 0.04em;
@@ -285,9 +338,9 @@ td {
   color: #26363b;
   font-size: 0.92rem;
   line-height: 1.45;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   white-space: normal;
-  word-break: break-word;
+  word-break: normal;
 }
 
 tbody tr:hover td {
@@ -316,6 +369,9 @@ tbody tr:hover td {
 
 .progress-card {
   align-items: center;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 247, 237, 0.92)),
+    radial-gradient(circle at left top, rgba(255, 107, 61, 0.12), transparent 16rem);
   display: flex;
   gap: 18px;
   margin-top: 22px;
@@ -325,6 +381,17 @@ tbody tr:hover td {
 .progress-card p {
   color: var(--muted);
   margin-bottom: 0;
+}
+
+.progress-card__note {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(183, 121, 31, 0.22);
+  border-radius: 16px;
+  color: #765019 !important;
+  font-weight: 700;
+  line-height: 1.6;
+  margin-top: 12px;
+  padding: 12px 14px;
 }
 
 .spinner {
@@ -351,6 +418,10 @@ tbody tr:hover td {
   .actions,
   .progress-card {
     flex-direction: column;
+  }
+
+  .hero {
+    padding: 26px 20px;
   }
 
   .hero__badge,

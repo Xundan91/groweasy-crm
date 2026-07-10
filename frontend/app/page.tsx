@@ -89,8 +89,13 @@ export default function Home() {
             Upload any valid CSV, preview it locally, then confirm to map messy columns into GrowEasy CRM
             records with AI-assisted extraction.
           </p>
+          <div className="step-list" aria-label="Import steps">
+            <span>1. Upload CSV</span>
+            <span>2. Preview rows</span>
+            <span>3. Confirm AI import</span>
+          </div>
         </div>
-        <div className="hero__badge">Next.js + Express + OpenAI</div>
+        <div className="hero__badge">Next.js + Express + Gemini</div>
       </section>
 
       <section
@@ -116,6 +121,7 @@ export default function Home() {
         <div className="dropzone__icon">CSV</div>
         <h2>Upload CSV</h2>
         <p>Drag and drop your file here, or choose a CSV from your computer.</p>
+        <p className="dropzone__hint">Preview happens instantly in the browser. AI extraction starts only after confirmation.</p>
         <button type="button" className="button button--secondary" onClick={() => inputRef.current?.click()}>
           Choose File
         </button>
@@ -154,6 +160,10 @@ export default function Home() {
           <div>
             <h2>Processing in batches</h2>
             <p>The backend is parsing records and mapping fields into the GrowEasy CRM schema.</p>
+            <p className="progress-card__note">
+              This API is deployed on Render. If the service is waking from a cold start, it may take more
+              than 2 minutes. Please keep this tab open and be patient.
+            </p>
           </div>
         </section>
       ) : null}
