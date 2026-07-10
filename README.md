@@ -44,7 +44,7 @@ Backend:
 
 ```bash
 PORT=4000
-FRONTEND_ORIGIN=http://localhost:3000
+FRONTEND_ORIGIN=http://localhost:3000,https://groweasy-crm-frontend-nu.vercel.app
 GEMINI_API_KEY=your_gemini_key
 GEMINI_MODEL=gemini-3.5-flash
 ```
@@ -93,7 +93,7 @@ A sample CSV is included at `samples/messy-leads.csv`.
 - Deploy `frontend` to Vercel.
 - Deploy `backend` to Render, Railway, Fly.io, or another Node.js host.
 - Set `NEXT_PUBLIC_API_BASE_URL` to the deployed backend URL.
-- Set `FRONTEND_ORIGIN` on the backend to the deployed frontend URL.
+- Set `FRONTEND_ORIGIN` on the backend to the deployed frontend URL, for example `https://groweasy-crm-frontend-nu.vercel.app`.
 - Add `GEMINI_API_KEY` and optionally tune `GEMINI_MODEL`.
 
 ## Submission Checklist

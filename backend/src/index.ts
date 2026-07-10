@@ -8,6 +8,12 @@ import type { ImportResponse } from "./types.js";
 
 const app = express();
 const port = Number(process.env.PORT ?? 4000);
+const allowedOrigins = new Set(
+  (process.env.FRONTEND_ORIGIN ?? "http://localhost:3000,https://groweasy-crm-frontend-nu.vercel.app")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+);
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
@@ -24,7 +30,14 @@ const upload = multer({
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_ORIGIN?.split(",") ?? "http://localhost:3000"
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`Origin ${origin} is not allowed by CORS`));
+    }
   })
 );
 app.use(express.json());
