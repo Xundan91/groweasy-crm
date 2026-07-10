@@ -9,8 +9,12 @@ An AI-powered CSV importer that previews arbitrary CSV files in the browser, the
 - Sticky-header tables with horizontal and vertical scrolling.
 - Express API that accepts CSV uploads, parses rows, batches AI extraction, and returns structured JSON.
 - Gemini-powered extraction when `GEMINI_API_KEY` is configured.
+- Retry mechanism for transient Gemini batch failures before fallback.
 - Deterministic fallback extractor for local demos without an API key.
 - Validation for allowed CRM statuses, allowed data sources, date compatibility, duplicate emails/phones, and invalid rows.
+- Incremental browser-side CSV parsing for responsive previews.
+- Virtualized table rendering for large parsed result sets.
+- Dark mode toggle.
 
 ## Tech Stack
 
@@ -37,6 +41,25 @@ npm run dev
 
 Frontend runs at `http://localhost:3000`.
 Backend runs at `http://localhost:4000`.
+
+## Tests
+
+```bash
+npm test
+```
+
+The backend unit tests cover CSV parsing, messy field mapping, duplicate contact handling, and invalid-row skipping.
+
+## Docker
+
+Run the full stack locally with Docker:
+
+```bash
+GEMINI_API_KEY=your_gemini_key docker compose up --build
+```
+
+Frontend: `http://localhost:3000`
+Backend: `http://localhost:4000`
 
 ## Environment Variables
 
@@ -87,6 +110,20 @@ A sample CSV is included at `samples/messy-leads.csv`.
 3. Review the browser preview.
 4. Click `Confirm Import`.
 5. Review parsed CRM records and skipped rows.
+
+## Bonus Features Implemented
+
+- Drag-and-drop upload.
+- Progress indicators for local parsing and AI processing.
+- Render cold-start notice during import.
+- Incremental CSV parsing in the browser.
+- Retry mechanism for failed Gemini batches.
+- Virtualized tables for large result sets.
+- Dark mode.
+- Backend unit tests.
+- Docker setup.
+- Vercel and Render deployment support.
+- README with setup and deployment instructions.
 
 ## Production Notes
 

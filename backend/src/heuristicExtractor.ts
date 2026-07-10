@@ -70,9 +70,12 @@ function allText(row: CsvRow) {
 }
 
 function extractEmails(row: CsvRow) {
-  const fromEmailFields = findValue(row, "email").match(EMAIL_REGEX) ?? [];
+  const emailFieldValue = findValue(row, "email");
+  const fromEmailFields = emailFieldValue.match(EMAIL_REGEX) ?? [];
+  if (fromEmailFields.length > 0) return [...new Set(fromEmailFields)];
+
   const fromWholeRow = allText(row).match(EMAIL_REGEX) ?? [];
-  return [...new Set([...fromEmailFields, ...fromWholeRow])];
+  return [...new Set(fromWholeRow)];
 }
 
 function splitPhone(rawPhone: string, row: CsvRow) {

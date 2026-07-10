@@ -1,22 +1,30 @@
 "use client";
 
 import Papa from "papaparse";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DataTable } from "@/components/DataTable";
 import type { CsvPreviewRow, ImportResponse } from "@/lib/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
+const PREVIEW_ROW_LIMIT = 500;
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [rows, setRows] = useState<CsvPreviewRow[]>([]);
+  const [uploadedRowCount, setUploadedRowCount] = useState(0);
   const [error, setError] = useState("");
   const [isDragging, setIsDragging] = useState(false);
+  const [isParsing, setIsParsing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [result, setResult] = useState<ImportResponse | null>(null);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   const previewRows = useMemo(() => rows.slice(0, 100), [rows]);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   function resetResult() {
     setResult(null);
@@ -33,28 +41,44 @@ export default function Home() {
     }
 
     setFile(nextFile);
+    setRows([]);
+    setUploadedRowCount(0);
+    setIsParsing(true);
+
     Papa.parse<CsvPreviewRow>(nextFile, {
       header: true,
       skipEmptyLines: true,
+      chunkSize: 1024 * 128,
       transformHeader: (header) => header.trim(),
       transform: (value) => value.trim(),
-      complete: ({ data, errors }) => {
+      chunk: ({ data, errors }) => {
         if (errors.length > 0) {
           setError(errors[0]?.message ?? "Could not parse the CSV file.");
           setRows([]);
+          setUploadedRowCount(0);
+          setIsParsing(false);
           return;
         }
-        setRows(data);
+        setUploadedRowCount((count) => count + data.length);
+        setRows((currentRows) => {
+          if (currentRows.length >= PREVIEW_ROW_LIMIT) return currentRows;
+          return [...currentRows, ...data].slice(0, PREVIEW_ROW_LIMIT);
+        });
+      },
+      complete: () => {
+        setIsParsing(false);
       },
       error: (parseError) => {
         setError(parseError.message);
         setRows([]);
+        setUploadedRowCount(0);
+        setIsParsing(false);
       }
     });
   }
 
   async function confirmImport() {
-    if (!file) return;
+    if (!file || isParsing) return;
     setIsImporting(true);
     setError("");
 
@@ -95,7 +119,16 @@ export default function Home() {
             <span>3. Confirm AI import</span>
           </div>
         </div>
-        <div className="hero__badge">Next.js + Express + Gemini</div>
+        <div className="hero__actions">
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={() => setTheme((currentTheme) => (currentTheme === "light" ? "dark" : "light"))}
+          >
+            {theme === "light" ? "Dark mode" : "Light mode"}
+          </button>
+          <div className="hero__badge">Next.js + Express + Gemini</div>
+        </div>
       </section>
 
       <section
@@ -130,12 +163,25 @@ export default function Home() {
 
       {error ? <div className="alert">{error}</div> : null}
 
-      {rows.length > 0 ? (
+      {isParsing ? (
+        <section className="progress-card progress-card--compact">
+          <div className="spinner" />
+          <div>
+            <h2>Reading CSV incrementally</h2>
+            <p>{uploadedRowCount.toLocaleString()} rows parsed locally so far. Preview will appear as rows stream in.</p>
+          </div>
+        </section>
+      ) : null}
+
+      {uploadedRowCount > 0 ? (
         <>
           <section className="summary-grid">
-            <Metric label="Uploaded rows" value={rows.length} />
+            <Metric label="Uploaded rows" value={uploadedRowCount} />
             <Metric label="Preview rows" value={previewRows.length} />
-            <Metric label="AI status" value={result ? (result.usedAi ? "Used AI" : "Fallback") : "Not started"} />
+            <Metric
+              label="AI status"
+              value={isParsing ? "Reading CSV" : result ? (result.usedAi ? "Used AI" : "Fallback") : "Not started"}
+            />
           </section>
 
           <DataTable title="CSV Preview" rows={previewRows} emptyMessage="Upload a CSV to preview rows." />
@@ -145,7 +191,7 @@ export default function Home() {
               type="button"
               className="button"
               onClick={confirmImport}
-              disabled={isImporting || rows.length === 0}
+              disabled={isImporting || isParsing || uploadedRowCount === 0}
             >
               {isImporting ? "Extracting leads..." : "Confirm Import"}
             </button>
